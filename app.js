@@ -1,6 +1,5 @@
 const express = require("express");
 const cors = require("cors");
-require("express-async-errors");
 
 const loginRouter = require("./routes/loginRouter");
 const postRouter = require("./routes/postRouter");
@@ -13,5 +12,10 @@ app.use(cors());
 app.use("/api/login", loginRouter);
 app.use("/api/posts", postRouter);
 app.use("/api/users", userRouter);
+
+app.use(function (err, req, res, next) {
+  console.log(err);
+  res.status(err.status || 500).json({ message: err.message });
+});
 
 module.exports = app;

@@ -2,7 +2,6 @@ const jwt = require("jsonwebtoken");
 const config = require("./config");
 
 const User = require("../models/user");
-const { model } = require("mongoose");
 
 const attachToken = (req, res, next) => {
   const auth = req.get("authorization");

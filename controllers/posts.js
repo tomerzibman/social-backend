@@ -14,16 +14,23 @@ const createPost = async (req, res) => {
   });
 
   const savedPost = await post.save();
-  res.status(201).json(savedPost);
+  const populatedPost = await savedPost.populate("user", {
+    username: 1,
+    name: 1,
+  });
+  res.status(201).json(populatedPost);
 };
 
 const updatePost = async (req, res) => {
   const postToUpdate = await Post.findById(req.params.id);
 
   if (!postToUpdate) {
-    res
-      .status(404)
-      .json({ message: `Post with id = ${req.params.id} not found` });
+    const error = new Error(`Post with id = ${req.params.id} not found :)`);
+    error.status = 404;
+    throw error;
+    // return res
+    //   .status(404)
+    //   .json({ message: `Post with id = ${req.params.id} not found` });
   }
 
   postToUpdate.title = req.body.title;
@@ -31,8 +38,11 @@ const updatePost = async (req, res) => {
   postToUpdate.likes = req.body.likes;
 
   const updatedPost = await postToUpdate.save();
-
-  res.json(updatedPost);
+  const populatedPost = await updatedPost.populate("user", {
+    username: 1,
+    name: 1,
+  });
+  res.json(populatedPost);
 };
 
 module.exports = { getAllPosts, createPost, updatePost };

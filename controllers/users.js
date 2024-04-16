@@ -8,12 +8,14 @@ const getAllUsers = async (req, res) => {
 
 const createUser = async (req, res) => {
   const passwordHash = await bcrypt.hash(req.body.password, 10);
+
   const user = new User({
     username: req.body.username,
     name: req.body.name,
     passwordHash: passwordHash,
     posts: [],
   });
+
   const savedUser = await user.save();
   res.status(201).json(savedUser);
 };

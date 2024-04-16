@@ -1,7 +1,7 @@
 const Post = require("../models/post");
 
 const getAllPosts = async (req, res) => {
-  const posts = await Post.find({});
+  const posts = await Post.find({}).populate("user", { username: 1, name: 1 });
   res.json(posts);
 };
 
@@ -10,7 +10,7 @@ const createPost = async (req, res) => {
     title: req.body.title,
     content: req.body.content,
     likes: req.body.likes,
-    user: req.body.author,
+    user: req.user.id,
   });
 
   const savedPost = await post.save();

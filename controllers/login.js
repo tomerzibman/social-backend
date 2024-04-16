@@ -3,6 +3,8 @@ const jwt = require("jsonwebtoken");
 
 const config = require("../util/config");
 const User = require("../models/user");
+const NotFoundError = require("../errors/NotFoundError");
+const UnauthorizedError = require("../errors/UnauthorizedError");
 
 const login = async (req, res) => {
   const username = req.body.username;
@@ -11,16 +13,18 @@ const login = async (req, res) => {
   const user = await User.findOne({ username: username });
 
   if (!user) {
-    return res
-      .status(404)
-      .json({ message: `user with username ${username} not found` });
+    throw new NotFoundError(`user with username ${username} not found`);
+    // return res
+    //   .status(404)
+    //   .json({ message: `user with username ${username} not found` });
   }
 
   const passwordCorrect = await bcrypt.compare(password, user.passwordHash);
   if (!passwordCorrect) {
-    return res.status(401).json({
-      message: "username or password incorrect, unauthenticated",
-    });
+    throw new UnauthorizedError("username or password incorrect");
+    // return res.status(401).json({
+    //   message: "username or password incorrect, unauthenticated",
+    // });
   }
 
   const token = jwt.sign(

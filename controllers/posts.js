@@ -1,3 +1,4 @@
+const NotFoundError = require("../errors/NotFoundError");
 const Post = require("../models/post");
 
 const getAllPosts = async (req, res) => {
@@ -25,9 +26,10 @@ const updatePost = async (req, res) => {
   const postToUpdate = await Post.findById(req.params.id);
 
   if (!postToUpdate) {
-    const error = new Error(`Post with id = ${req.params.id} not found :)`);
-    error.status = 404;
-    throw error;
+    throw new NotFoundError(`Post with id = ${req.params.id} not found`);
+    // const error = new Error(`Post with id = ${req.params.id} not found :)`);
+    // error.status = 404;
+    // throw error;
     // return res
     //   .status(404)
     //   .json({ message: `Post with id = ${req.params.id} not found` });

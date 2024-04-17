@@ -1,17 +1,9 @@
 const mongoose = require("mongoose");
 
-const postSchema = mongoose.Schema(
+const commentSchema = mongoose.Schema(
   {
-    title: {
-      type: String,
-      required: true,
-    },
     content: {
       type: String,
-      required: true,
-    },
-    likes: {
-      type: Number,
       required: true,
     },
     user: {
@@ -19,17 +11,16 @@ const postSchema = mongoose.Schema(
       ref: "User",
       required: true,
     },
-    comments: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Comment",
-      },
-    ],
+    post: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Post",
+      required: true,
+    },
   },
   { timestamps: true }
 );
 
-postSchema.set("toJSON", {
+commentSchema.set("toJSON", {
   transform: (document, returnedObject) => {
     returnedObject.id = returnedObject._id.toString();
     delete returnedObject._id;
@@ -37,4 +28,4 @@ postSchema.set("toJSON", {
   },
 });
 
-module.exports = mongoose.model("Post", postSchema);
+module.exports = mongoose.model("Comment", commentSchema);

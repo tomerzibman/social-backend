@@ -2,7 +2,16 @@ const NotFoundError = require("../errors/NotFoundError");
 const Post = require("../models/post");
 
 const getAllPosts = async (req, res) => {
-  const posts = await Post.find({}).populate("user", { username: 1, name: 1 });
+  const posts = await Post.find({})
+    .populate("user", { username: 1, name: 1 })
+    .populate({
+      path: "comments",
+      populate: {
+        path: "user",
+        select: "username",
+      },
+      select: "content",
+    });
   res.json(posts);
 };
 
@@ -12,6 +21,7 @@ const createPost = async (req, res) => {
     content: req.body.content,
     likes: req.body.likes,
     user: req.user.id,
+    comments: [],
   });
 
   const savedPost = await post.save();

@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 
 const errorHandler = function (err, req, res, next) {
+  console.log(err);
   if (err.status && err.type && err.message) {
     return res
       .status(err.status)

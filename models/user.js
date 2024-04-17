@@ -19,6 +19,9 @@ const userSchema = mongoose.Schema({
       ref: "Post",
     },
   ],
+  photo: {
+    type: String,
+  },
 });
 
 userSchema.set("toJSON", {

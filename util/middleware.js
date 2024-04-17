@@ -1,7 +1,34 @@
 const jwt = require("jsonwebtoken");
 const config = require("./config");
+const multer = require("multer");
 
 const User = require("../models/user");
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "./images");
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + "-" + file.originalname);
+  },
+});
+
+const fileFilter = (req, file, cb) => {
+  const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
+
+  if (allowedTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    const err = new Error("Invalid photo type");
+    err.status = 500;
+    cb(err, false);
+  }
+};
+
+const upload = multer({
+  storage: storage,
+  fileFilter: fileFilter,
+});
 
 const attachToken = (req, res, next) => {
   const auth = req.get("authorization");
@@ -20,4 +47,4 @@ const attachUser = async (req, res, next) => {
   next();
 };
 
-module.exports = { attachToken, attachUser };
+module.exports = { attachToken, attachUser, upload };

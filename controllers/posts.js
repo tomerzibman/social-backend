@@ -46,10 +46,17 @@ const updatePost = async (req, res) => {
   postToUpdate.likes = req.body.likes;
 
   const updatedPost = await postToUpdate.save();
-  const populatedPost = await updatedPost.populate("user", {
-    username: 1,
-    name: 1,
-  });
+  const populatedPost = await Post.findById(updatedPost._id)
+    .populate("user", { username: 1, name: 1 })
+    .populate({
+      path: "comments",
+      populate: {
+        path: "user",
+        select: "username",
+      },
+      select: "content",
+    });
+
   res.json(populatedPost);
 };
 

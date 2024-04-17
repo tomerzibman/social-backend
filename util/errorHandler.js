@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
 
 const errorHandler = function (err, req, res, next) {
   if (err.status && err.type && err.message) {

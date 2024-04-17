@@ -14,17 +14,11 @@ const login = async (req, res) => {
 
   if (!user) {
     throw new NotFoundError(`user with username ${username} not found`);
-    // return res
-    //   .status(404)
-    //   .json({ message: `user with username ${username} not found` });
   }
 
   const passwordCorrect = await bcrypt.compare(password, user.passwordHash);
   if (!passwordCorrect) {
     throw new UnauthorizedError("username or password incorrect");
-    // return res.status(401).json({
-    //   message: "username or password incorrect, unauthenticated",
-    // });
   }
 
   const token = jwt.sign(

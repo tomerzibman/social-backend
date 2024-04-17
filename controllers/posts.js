@@ -19,6 +19,8 @@ const createPost = async (req, res) => {
     username: 1,
     name: 1,
   });
+  req.user.posts.push(populatedPost._id);
+  await req.user.save();
   res.status(201).json(populatedPost);
 };
 
@@ -27,12 +29,6 @@ const updatePost = async (req, res) => {
 
   if (!postToUpdate) {
     throw new NotFoundError(`Post with id = ${req.params.id} not found`);
-    // const error = new Error(`Post with id = ${req.params.id} not found :)`);
-    // error.status = 404;
-    // throw error;
-    // return res
-    //   .status(404)
-    //   .json({ message: `Post with id = ${req.params.id} not found` });
   }
 
   postToUpdate.title = req.body.title;

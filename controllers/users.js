@@ -7,7 +7,6 @@ const getAllUsers = async (req, res) => {
 };
 
 const createUser = async (req, res) => {
-  console.log(req.body);
   const passwordHash = await bcrypt.hash(req.body.password, 10);
   const photoPath =
     !req.file || !req.file.filename ? "default.jpg" : req.file.filename;
@@ -17,7 +16,7 @@ const createUser = async (req, res) => {
     name: req.body.name,
     passwordHash: passwordHash,
     posts: [],
-    photo: `${process.env.PROTOCOL}://${process.env.HOST}/images/${photoPath}`,
+    photo: `${req.protocol}://${req.get("host")}/images/${photoPath}`,
   });
 
   const savedUser = await user.save();

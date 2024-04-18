@@ -17,14 +17,9 @@ const errorHandler = function (err, req, res, next) {
     errType = "Unauthorized";
     errMsg = err.message || "Invalid token";
   } else if (err instanceof mongoose.Error.ValidationError) {
-    status = 400;
-    errType = "Validation Error";
-    const field = Object.keys(err.errors)[0];
-    errMsg = `${field}: ${err.errors[field].message}`;
-  } else if (err.name === "BcryptError") {
-    status = 500;
-    errType = "Internal Server Error";
-    errMsg = "Bcrypt error occured";
+    return res
+      .status(400)
+      .json({ error: err.errors, message: "Validation error occured" });
   }
 
   return res.status(status).json({ error: errType, message: errMsg });

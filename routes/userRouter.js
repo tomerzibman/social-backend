@@ -9,8 +9,8 @@ userRouter.get("/", userController.getAllUsers);
 
 userRouter.post(
   "/",
-  validateOn(userSchema),
   upload.single("photo"),
+  validateOn(userSchema),
   userController.createUser
 );
 

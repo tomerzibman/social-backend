@@ -6,7 +6,7 @@ const schema = {
     postId: { type: "string", nonWhiteSpace: true },
     content: { type: "string", nonWhiteSpace: true },
   },
-  required: ["title", "content"],
+  required: ["content", "postId"],
 };
 
 module.exports = ajv.compile(schema);

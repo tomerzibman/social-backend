@@ -28,6 +28,7 @@ const createPost = async (req, res) => {
   const populatedPost = await savedPost.populate("user", {
     username: 1,
     name: 1,
+    photo: 1,
   });
   req.user.posts.push(populatedPost._id);
   await req.user.save();

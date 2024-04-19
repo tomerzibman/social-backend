@@ -12,7 +12,7 @@ const errorHandler = function (err, req, res, next) {
   let errType = err.type || "Internal Server Error";
   let errMsg = err.message || "An unexpected error occured";
 
-  if (err.name === "JsonWebTokenError") {
+  if (err.name === "JsonWebTokenError" || err.name === "TokenExpiredError") {
     status = 401;
     errType = "Unauthorized";
     errMsg = err.message || "Invalid token";

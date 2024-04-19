@@ -20,6 +20,7 @@ const addComment = async (req, res) => {
   const populatedComment = await savedComment.populate("user", {
     username: 1,
     name: 1,
+    photo: 1,
   });
   res.json(populatedComment);
 };

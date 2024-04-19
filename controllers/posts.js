@@ -8,7 +8,7 @@ const getAllPosts = async (req, res) => {
       path: "comments",
       populate: {
         path: "user",
-        select: "username",
+        select: "username photo",
       },
       select: "content createdAt",
     });
@@ -53,7 +53,7 @@ const updatePost = async (req, res) => {
       path: "comments",
       populate: {
         path: "user",
-        select: "username",
+        select: "username photo",
       },
       select: "content createdAt",
     });

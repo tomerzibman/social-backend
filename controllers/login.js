@@ -28,7 +28,12 @@ const login = async (req, res) => {
       expiresIn: 60 * 60,
     }
   );
-  res.json({ token, username: user.username, name: user.name });
+  res.json({
+    token,
+    username: user.username,
+    name: user.name,
+    photo: user.photo,
+  });
 };
 
 module.exports = { login };

@@ -7,6 +7,8 @@ const userSchema = require("../validation-schemas/userSchema");
 
 userRouter.get("/", userController.getAllUsers);
 
+userRouter.get("/:id", userController.getUserById);
+
 userRouter.post(
   "/",
   upload.single("photo"),

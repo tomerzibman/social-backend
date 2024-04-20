@@ -1,7 +1,9 @@
 const NotFoundError = require("../errors/NotFoundError");
-const user = require("../models/user");
+const UnauthorizedError = require("../errors/UnauthorizedError");
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const config = require("../util/config");
 
 const getAllUsers = async (req, res) => {
   const { search } = req.query;
@@ -59,4 +61,45 @@ const createUser = async (req, res) => {
   res.status(201).json(savedUser);
 };
 
-module.exports = { getAllUsers, getUserById, createUser };
+const updateUser = async (req, res) => {
+  const decodedToken = jwt.verify(req.token, config.SECRET);
+  if (!decodedToken.id || decodedToken.id != req.params.id) {
+    throw UnauthorizedError();
+  }
+
+  const photoPath = !req.file || !req.file.filename ? null : req.file.filename;
+
+  const user = await User.findById(req.params.id);
+
+  user.username = req.body.username || user.username;
+  user.name = req.body.name || user.name;
+  user.photo =
+    photoPath === null
+      ? user.photo
+      : `${req.protocol}://${req.get("host")}/images/${photoPath}`;
+
+  await user.save();
+  const userToReturn = await User.findById(req.params.id)
+    .populate({
+      path: "posts",
+      populate: {
+        path: "user",
+        select: "username name photo",
+      },
+      select: "title content",
+    })
+    .populate({
+      path: "posts",
+      populate: {
+        path: "comments",
+        populate: {
+          path: "user",
+          select: "username name photo",
+        },
+        select: "content",
+      },
+    });
+  res.json(userToReturn);
+};
+
+module.exports = { getAllUsers, getUserById, createUser, updateUser };

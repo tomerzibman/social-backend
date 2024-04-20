@@ -1,7 +1,7 @@
 const userRouter = require("express").Router();
 
 const userController = require("../controllers/users");
-const { upload } = require("../util/middleware");
+const { upload, attachToken } = require("../util/middleware");
 const validateOn = require("../middleware/validate");
 const userSchema = require("../validation-schemas/userSchema");
 
@@ -14,6 +14,13 @@ userRouter.post(
   upload.single("photo"),
   validateOn(userSchema),
   userController.createUser
+);
+
+userRouter.put(
+  "/:id",
+  upload.single("photo"),
+  attachToken,
+  userController.updateUser
 );
 
 module.exports = userRouter;

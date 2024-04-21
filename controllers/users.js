@@ -25,7 +25,7 @@ const getUserById = async (req, res) => {
         path: "user",
         select: "username name photo",
       },
-      select: "title content",
+      select: "id title content",
     })
     .populate({
       path: "posts",
@@ -35,7 +35,7 @@ const getUserById = async (req, res) => {
           path: "user",
           select: "username name photo",
         },
-        select: "content",
+        select: "content createdAt",
       },
     });
   if (!user) {
@@ -86,7 +86,7 @@ const updateUser = async (req, res) => {
         path: "user",
         select: "username name photo",
       },
-      select: "title content",
+      select: "id title content",
     })
     .populate({
       path: "posts",
@@ -96,7 +96,7 @@ const updateUser = async (req, res) => {
           path: "user",
           select: "username name photo",
         },
-        select: "content",
+        select: "content createdAt",
       },
     });
   res.json(userToReturn);

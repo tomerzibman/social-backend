@@ -3,12 +3,12 @@ const Post = require("../models/post");
 
 const getAllPosts = async (req, res) => {
   const posts = await Post.find({})
-    .populate("user", { username: 1, name: 1, photo: 1 })
+    .populate("user", { id: 1, username: 1, name: 1, photo: 1 })
     .populate({
       path: "comments",
       populate: {
         path: "user",
-        select: "username photo",
+        select: "id username photo",
       },
       select: "content createdAt",
     });
@@ -26,6 +26,7 @@ const createPost = async (req, res) => {
 
   const savedPost = await post.save();
   const populatedPost = await savedPost.populate("user", {
+    id: 1,
     username: 1,
     name: 1,
     photo: 1,
@@ -48,12 +49,12 @@ const updatePost = async (req, res) => {
 
   const updatedPost = await postToUpdate.save();
   const populatedPost = await Post.findById(updatedPost._id)
-    .populate("user", { username: 1, name: 1, photo: 1 })
+    .populate("user", { id: 1, username: 1, name: 1, photo: 1 })
     .populate({
       path: "comments",
       populate: {
         path: "user",
-        select: "username photo",
+        select: "id username photo",
       },
       select: "content createdAt",
     });

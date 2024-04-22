@@ -18,7 +18,12 @@ const Message = require("./models/message");
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIO(server);
+const io = socketIO(server, {
+  cors: {
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST"],
+  },
+});
 
 mongoose
   .connect(config.MONGODB_URI)
@@ -38,6 +43,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("sendMessage", (data) => {
+    console.log("on sendMessage: ", data.content);
     const message = new Message({
       conversation: data.conversation,
       sender: data.sender,
@@ -53,11 +59,12 @@ io.on("connection", (socket) => {
         });
       })
       .then((populatedMessage) => {
+        console.log("emit newMessage: ", populatedMessage.content);
         io.to(data.conversation).emit("newMessage", populatedMessage);
       });
   });
 
-  socket.on("disconnet", () => {
+  socket.on("disconnect", () => {
     console.log("a user disconnected");
   });
 });

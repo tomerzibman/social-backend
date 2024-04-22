@@ -45,6 +45,11 @@ const getUserById = async (req, res) => {
 };
 
 const createUser = async (req, res) => {
+  const existingUser = await User.findOne({ username: req.body.username });
+  if (existingUser) {
+    return res.status(400).json({ status: 400, message: "username taken" });
+  }
+
   const passwordHash = await bcrypt.hash(req.body.password, 10);
   const photoPath =
     !req.file || !req.file.filename ? "default.jpg" : req.file.filename;

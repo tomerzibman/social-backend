@@ -6,7 +6,11 @@ const validateOn = (validate) => {
       console.log(errors);
       return res
         .status(400)
-        .json({ error: errors, message: "Validation error eccrued" });
+        .json({
+          error: errors,
+          message: "Validation error occrued",
+          type: "ajv val",
+        });
     }
     next();
   };

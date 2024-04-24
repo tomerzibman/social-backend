@@ -15,6 +15,15 @@ postRouter.post(
   postController.createPost
 );
 
-postRouter.put("/:id", attachToken, attachUser, postController.updatePost);
+//postRouter.put("/:id", attachToken, attachUser, postController.updatePost);
+
+postRouter.put("/like/:id", attachToken, attachUser, postController.likePost);
+
+postRouter.put(
+  "/unlike/:id",
+  attachToken,
+  attachUser,
+  postController.unlikePost
+);
 
 module.exports = postRouter;

@@ -19,7 +19,7 @@ const createPost = async (req, res) => {
   const post = new Post({
     title: req.body.title,
     content: req.body.content,
-    likes: 0,
+    likes: [],
     user: req.user.id,
     comments: [],
   });
@@ -62,4 +62,58 @@ const updatePost = async (req, res) => {
   res.json(populatedPost);
 };
 
-module.exports = { getAllPosts, createPost, updatePost };
+const likePost = async (req, res) => {
+  const postId = req.params.id;
+
+  const postToLike = await Post.findById(postId);
+  if (!postToLike) {
+    throw new NotFoundError("Post not found");
+  } else if (postToLike.likes.includes(req.user._id)) {
+    return res.status(400).json({ message: "Post already liked" });
+  }
+
+  postToLike.likes.push(req.user._id);
+  const likedPost = await postToLike.save();
+  const populatedPost = await Post.findById(likedPost._id)
+    .populate("user", { id: 1, username: 1, name: 1, photo: 1 })
+    .populate({
+      path: "comments",
+      populate: {
+        path: "user",
+        select: "id username photo",
+      },
+      select: "content createdAt",
+    });
+
+  res.json(populatedPost);
+};
+
+const unlikePost = async (req, res) => {
+  const postId = req.params.id;
+
+  const postToUnlike = await Post.findById(postId);
+  if (!postToUnlike) {
+    throw new NotFoundError("Post not found");
+  } else if (!postToUnlike.likes.includes(req.user._id)) {
+    return res.status(400).json({ message: "Post was never liked" });
+  }
+
+  postToUnlike.likes = postToUnlike.likes.filter(
+    (uId) => !uId.equals(req.user._id)
+  );
+  const unlikedPost = await postToUnlike.save();
+  const populatedPost = await Post.findById(unlikedPost._id)
+    .populate("user", { id: 1, username: 1, name: 1, photo: 1 })
+    .populate({
+      path: "comments",
+      populate: {
+        path: "user",
+        select: "id username photo",
+      },
+      select: "content createdAt",
+    });
+
+  res.json(populatedPost);
+};
+
+module.exports = { getAllPosts, createPost, updatePost, likePost, unlikePost };

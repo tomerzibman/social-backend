@@ -1,4 +1,5 @@
 const Conversation = require("../models/conversation");
+const UnreadCount = require("../models/unreadCount");
 
 const getConversationsForUser = async (req, res) => {
   console.log("getting convo");
@@ -26,6 +27,16 @@ const createConversation = async (req, res) => {
   const populatedConversation = await Conversation.findById(
     savedConversation._id
   ).populate("participants", "id username photo");
+
+  participants.forEach(async (participant) => {
+    const unreadCount = new UnreadCount({
+      conversation: populatedConversation._id,
+      participant: participant,
+      count: 0,
+    });
+    await unreadCount.save();
+  });
+
   res.json(populatedConversation);
 };
 

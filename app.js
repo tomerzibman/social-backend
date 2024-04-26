@@ -23,7 +23,8 @@ const server = http.createServer(app);
 const io = socketIO(server, {
   cors: {
     origin: "http://localhost:5173",
-    methods: ["GET", "POST"],
+    //methods: ["GET", "POST"],
+    credentials: true,
   },
 });
 
@@ -42,6 +43,11 @@ io.on("connection", (socket) => {
   socket.on("joinConversation", (conversation) => {
     socket.join(conversation);
     console.log(`user joing conversation ${conversation}`);
+  });
+
+  socket.on("leaveConversation", (conversation) => {
+    socket.leave(conversation);
+    console.log(`user left conversation ${conversation}`);
   });
 
   socket.on("joinReceiver", (receiverId) => {
@@ -76,12 +82,13 @@ io.on("connection", (socket) => {
       participant: { $ne: data.sender },
     });
 
-    io.to(data.conversation).emit("newMessage", populatedMessage);
-    console.log("emit updateUnreadCount", updatedUnreadCount);
+    console.log("emit updateUnreadCount", updatedUnreadCount.count);
     io.to(updatedUnreadCount.participant.toString()).emit(
       "updateUnreadCount",
       updatedUnreadCount
     );
+    console.log("emit newMessage", populatedMessage.content);
+    io.to(data.conversation).emit("newMessage", populatedMessage);
 
     // message
     //   .save()
@@ -100,14 +107,37 @@ io.on("connection", (socket) => {
     //   });
   });
 
-  socket.on("markAsRead", async (data) => {
+  socket.on("resetUnreadCount", async (data) => {
     const updatedUnreadCount = await UnreadCount.findOneAndUpdate(
       { conversation: data.conversation, participant: data.participant },
       { $set: { count: 0 } },
       { new: true }
     );
-    //console.log(`Date: ${data.date}, convo: ${data.conversation}`);
-    io.to(data.conversation).emit("updateUnreadCount", updatedUnreadCount);
+    //io.to(data.conversation).emit("updateUnreadCount", updatedUnreadCount);
+    console.log("emit updateUnreadCount:", updatedUnreadCount.count);
+    io.to(data.participant).emit("updateUnreadCount", updatedUnreadCount);
+  });
+
+  socket.on("markAsRead", async (messageData) => {
+    console.log("on markAsRead");
+    const messageToRead = await Message.findById(messageData.id);
+    messageToRead.readAt = messageData.readAt;
+    await messageToRead.save();
+    console.log("emit messageRead: ", messageToRead.content);
+    io.to(messageData.sender.toString()).emit("messageRead", messageData);
+
+    // const messageToRead = await Message.findById(message.id);
+    // messageToRead.readAt = new Date().toISOString();
+    // const readMessage = await messageToRead.save();
+    // const populatedMessage = await Message.findById(readMessage._id).populate(
+    //   "sender",
+    //   {
+    //     id: 1,
+    //     username: 1,
+    //   }
+    // );
+    // console.log("emit messageRead: ", populatedMessage.content);
+    // io.to(message.sender.id.toString()).emit("messageRead", populatedMessage);
   });
 
   socket.on("disconnect", () => {

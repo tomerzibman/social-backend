@@ -89,22 +89,6 @@ io.on("connection", (socket) => {
     );
     console.log("emit newMessage", populatedMessage.content);
     io.to(data.conversation).emit("newMessage", populatedMessage);
-
-    // message
-    //   .save()
-    //   .then((savedMessage) => {
-    //     return Message.findById(savedMessage._id).populate("sender", {
-    //       id: 1,
-    //       username: 1,
-    //     });
-    //   })
-    //   .then((populatedMessage) => {
-    //     console.log(
-    //       "BEFORE EMIT newMessage -> unread count + 1 for all but sender"
-    //     );
-    //     console.log("emit newMessage: ", populatedMessage.content);
-    //     io.to(data.conversation).emit("newMessage", populatedMessage);
-    //   });
   });
 
   socket.on("resetUnreadCount", async (data) => {
@@ -113,7 +97,6 @@ io.on("connection", (socket) => {
       { $set: { count: 0 } },
       { new: true }
     );
-    //io.to(data.conversation).emit("updateUnreadCount", updatedUnreadCount);
     console.log("emit updateUnreadCount:", updatedUnreadCount.count);
     io.to(data.participant).emit("updateUnreadCount", updatedUnreadCount);
   });
@@ -138,6 +121,44 @@ io.on("connection", (socket) => {
     // );
     // console.log("emit messageRead: ", populatedMessage.content);
     // io.to(message.sender.id.toString()).emit("messageRead", populatedMessage);
+  });
+
+  socket.on("readUnreadMessages", async (data) => {
+    console.log("on readUnreadMessages");
+    const unreadCount = await UnreadCount.findOne({
+      conversation: data.conversation,
+      participant: data.sender,
+    });
+    if (unreadCount && unreadCount.count > 0) {
+      const messagesToRead = await Message.find({
+        conversation: data.conversation,
+        sender: data.reciver,
+      })
+        .sort({ createdAt: -1 })
+        .limit(unreadCount.count);
+
+      const messagesIds = [];
+      for (const message of messagesToRead) {
+        if (!message.readAt || message.readAt == null) {
+          message.readAt = data.dateiso;
+          messagesIds.push(message._id.toString());
+          await message.save();
+        }
+      }
+      console.log("emit readMessages to:", data.sender);
+      io.to(data.reciver).emit("readMessages", {
+        messagesIds,
+        readAt: data.dateiso,
+      });
+    }
+
+    const updatedUnreadCount = await UnreadCount.findOneAndUpdate(
+      { conversation: data.conversation, participant: data.sender },
+      { $set: { count: 0 } },
+      { new: true }
+    );
+    console.log("emit updateUnreadCount to:", data.sender);
+    io.to(data.sender).emit("updateUnreadCount", updatedUnreadCount);
   });
 
   socket.on("disconnect", () => {
